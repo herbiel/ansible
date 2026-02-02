@@ -41,29 +41,36 @@ echo "Waiting for services to initialize..."
 sleep 5
 
 # Install dependencies
-echo "Updating/Installing Composer dependencies..."
+echo "Checking Composer dependencies..."
 
-# Force remove corrupted lock/vendor if they exist to ensure clean slate
-docker compose exec -T app rm -rf vendor composer.lock
+# Detect if vendor exists
+VENDOR_EXISTS=$(docker compose exec -T app ls -d vendor 2>/dev/null || echo "")
 
-# Robustly patch composer.json for Laravel 5.5 + Composer 2 compatibility
-echo "Applying compatibility patches to composer.json..."
-docker compose exec -T app php -r '
-    $path = "composer.json";
-    $json = json_decode(file_get_contents($path), true);
-    // Fix framework version
-    if (isset($json["require"]["laravel/framework"])) {
-        $json["require"]["laravel/framework"] = "5.5.*";
-    }
-    // Allow necessary plugins
-    $json["config"]["allow-plugins"] = [
-        "kylekatarnls/update-helper" => true,
-        "symfony/thanks" => true
-    ];
-    file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-'
+if [ -z "$VENDOR_EXISTS" ]; then
+    echo "Vendor directory not found. Installing dependencies..."
+    
+    # Robustly patch composer.json for Laravel 5.5 + Composer 2 compatibility
+    echo "Applying compatibility patches to composer.json..."
+    docker compose exec -T app php -r '
+        $path = "composer.json";
+        $json = json_decode(file_get_contents($path), true);
+        // Fix framework version
+        if (isset($json["require"]["laravel/framework"])) {
+            $json["require"]["laravel/framework"] = "5.5.*";
+        }
+        // Allow necessary plugins
+        $json["config"]["allow-plugins"] = [
+            "kylekatarnls/update-helper" => true,
+            "symfony/thanks" => true
+        ];
+        file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    '
 
-docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
+    docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
+else
+    echo "Vendor directory exists. Skipping composer install."
+    echo "Hint: If you need to update dependencies, run: docker compose exec app composer install"
+fi
 
 # Run migrations and setup
 echo "Checking database status..."
