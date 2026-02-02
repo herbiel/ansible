@@ -83,3 +83,30 @@ ansible-playbook -i inventory.ini playbook.yml
 ## 6. 注意事项
 - **PHP 7.1/7.3**: 由于 Debian 13 较新，旧版 PHP 通过 `sury.org` 仓库提供。
 - **Security**: 请确保 `inventory.ini` 中的 `ansible_user` 和 `ansible_become` 设置正确（建议使用 sudo 用户）。
+
+---
+
+## 7. 版本控制 (Git Multi-Remote Push)
+
+项目配置了同时推送到 GitLab 和 GitHub。
+
+### 7.1 查看配置
+```bash
+git remote -v
+```
+你应该能看到 `origin` 远程库有两个 push 地址。
+
+### 7.2 如何手动添加 (供参考)
+如果你需要重新配置，可以使用以下命令：
+```bash
+# 添加第一个 push 地址 (GitLab)
+git remote set-url --add --push origin git@gitlab.tangbull.com:devops/ansible.git
+# 添加第二个 push 地址 (GitHub)
+git remote set-url --add --push origin git@github.com:herbiel/ansible.git
+```
+
+### 7.3 推送命令
+执行一次 `git push` 会同时更新两个仓库：
+```bash
+git push origin main
+```
