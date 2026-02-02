@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     supervisor \
     nginx \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip opcache
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip opcache sockets
 
 # Install Redis extension (Version 5.3.7 is compatible with PHP 7.1)
 RUN pecl install -o -f redis-5.3.7 \
