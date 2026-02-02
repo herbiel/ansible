@@ -16,7 +16,7 @@
 
 - name: Add SignalWire FreeSWITCH repo
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ {{ ansible_distribution_release }} main"
+    repo: "deb [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/{{ 'debian-unstable' if ansible_distribution_release == 'trixie' else 'debian-release' }}/ {{ ansible_distribution_release }} main"
     state: present
     filename: freeswitch
 
