@@ -34,8 +34,8 @@ RUN pecl install -o -f redis-5.3.7 \
     &&  rm -rf /tmp/pear \
     &&  docker-php-ext-enable redis
 
-# Install Composer (Use 2.2 LTS for PHP < 7.2.5 support)
-COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
+# Install Composer (Use 1.x for legacy Laravel 5.5/PHP 7.1 support)
+COPY --from=composer:1 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
