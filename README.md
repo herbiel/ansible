@@ -152,10 +152,16 @@ git push origin main
     # PHP 版本
     PHP_VERSION=7.4
     ```
-4.  一键启动：
+4.  **Verification**:
+    Check if the application is running:
     ```bash
-    ./deploy.sh
+    curl -I http://127.0.0.1:8000
+    ```
+    You should see `HTTP/1.1 200 OK` or `HTTP/1.1 302 Found` (if redirecting to login).
+
+    View logs:
+    ```bash
+    docker compose logs -f app
     ```
     
 这样，所有的 Docker 配置文件都保留在 `ansible` 仓库中统一管理，而您的各个 Laravel 项目只需要专注于代码。
-
