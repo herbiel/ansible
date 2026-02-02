@@ -46,10 +46,10 @@ echo "Composer Version:"
 docker compose exec -T app composer --version
 
 # Force remove old vendor to ensure clean slate for Composer 2 compatibility
-docker-compose exec -T app rm -rf vendor composer.lock
-docker-compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
+docker compose exec -T app rm -rf vendor composer.lock
+docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
 # Fix permissions after install
-docker-compose exec -T app chown -R www-data:www-data /var/www/html/vendor
+docker compose exec -T app chown -R www-data:www-data /var/www/html/vendor
 
 # Run migrations and setup
 echo "Running migrations..."
