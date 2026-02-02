@@ -25,6 +25,10 @@ services:
     depends_on:
       - db
       - redis
+    deploy:
+      resources:
+        limits:
+          memory: 4G
     networks:
       - app-network
 
@@ -32,7 +36,7 @@ services:
     image: redis:6-alpine
     container_name: ${APP_NAME:-laravel}_redis
     restart: always
-    command: redis-server --requirepass ${REDIS_PASSWORD:-secret}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-secret} --maxmemory 512mb --maxmemory-policy allkeys-lru
     networks:
       - app-network
 
@@ -40,6 +44,7 @@ services:
     image: mysql:5.7
     container_name: ${APP_NAME:-laravel}_db
     restart: always
+    command: --max-connections=500 --innodb-buffer-pool-size=1G
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
       MYSQL_DATABASE: ${DB_DATABASE:-laravel}

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Copy .env if not exists
 if [ ! -f .env ]; then
@@ -37,43 +38,40 @@ echo "Starting deployment..."
 docker compose up -d
 
 echo "Waiting for services to initialize..."
-sleep 10
+sleep 5
 
-# Install dependencies if missing or corrupted
+# Install dependencies
 echo "Updating/Installing Composer dependencies..."
-# Verify Composer version
-echo "Composer Version:"
-docker compose exec -T app composer --version
 
-# Force remove old vendor to ensure clean slate for Composer 2 compatibility
+# Force remove corrupted lock/vendor if they exist to ensure clean slate
 docker compose exec -T app rm -rf vendor composer.lock
 
-# Auto-patch composer.json to allow newer Laravel 5.5 versions (Fixes Composer 2 Incompatibility)
-echo "Patching composer.json for Composer 2 compatibility..."
-docker compose exec -T app sed -i 's/"laravel\/framework": "5.5.42"/"laravel\/framework": "5.5.*"/' composer.json
+# Robustly patch composer.json for Laravel 5.5 + Composer 2 compatibility
+echo "Applying compatibility patches to composer.json..."
+docker compose exec -T app php -r '
+    $path = "composer.json";
+    $json = json_decode(file_get_contents($path), true);
+    // Fix framework version
+    if (isset($json["require"]["laravel/framework"])) {
+        $json["require"]["laravel/framework"] = "5.5.*";
+    }
+    // Allow necessary plugins
+    $json["config"]["allow-plugins"] = [
+        "kylekatarnls/update-helper" => true,
+        "symfony/thanks" => true
+    ];
+    file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+'
 
-# Allow necessary plugins for Composer 2 (Explicitly and verifiable)
-echo "Configuring allowed plugins..."
-docker compose exec -T app composer config --no-plugins allow-plugins.kylekatarnls/update-helper true
-docker compose exec -T app composer config --no-plugins allow-plugins.symfony/thanks true
-
-# Debug: verify config applied
-echo "Verifying composer.json content:"
-docker compose exec -T app cat composer.json
-
-echo "Installing Composer dependencies..."
-# Use --no-plugins during install if needed, but we likely need them. 
-# We rely on the config above being successful.
 docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
-# Fix permissions after install
-docker compose exec -T app chown -R www-data:www-data /var/www/html/vendor
 
 # Run migrations and setup
 echo "Running migrations..."
-docker compose exec app php artisan migrate --force
+docker compose exec -T app php artisan migrate --force
 
 # Set permissions
-docker compose exec app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+echo "Setting permissions..."
+docker compose exec -T app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 echo "Deployment complete! App running at http://localhost:$APP_PORT"
 echo "Check logs with: docker compose logs -f app"
