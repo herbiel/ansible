@@ -7,7 +7,7 @@ services:
         PHP_VERSION: ${PHP_VERSION:-7.1}
         PUID: ${PUID:-1000}
         PGID: ${PGID:-1000}
-    image: ${APP_NAME:-laravel}-app:${PHP_VERSION:-7.1}
+    image: callgroup_php:${PHP_VERSION:-7.1}
     container_name: ${APP_NAME:-laravel}_app
     restart: always
     ports:
