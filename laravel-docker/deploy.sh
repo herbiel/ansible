@@ -66,6 +66,22 @@ docker compose exec -T app php -r '
 docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
 
 # Run migrations and setup
+echo "Checking database status..."
+# Check if core table 'users' exists
+TABLE_EXISTS=$(docker compose exec -T db mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" -N -e "SHOW TABLES LIKE 'users';" "$DB_DATABASE" || echo "")
+
+if [ -z "$TABLE_EXISTS" ]; then
+    echo "Database is empty. Initializing with database/init.sql..."
+    if [ -f "$APP_CODE_PATH/database/init.sql" ]; then
+        docker compose exec -T db mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" < "$APP_CODE_PATH/database/init.sql"
+        echo "Database initialized successfully."
+    else
+        echo "Warning: database/init.sql not found. Skipping initialization."
+    fi
+else
+    echo "Database already contains data. Skipping initialization."
+fi
+
 echo "Running migrations..."
 docker compose exec -T app php artisan migrate --force
 
@@ -73,5 +89,7 @@ docker compose exec -T app php artisan migrate --force
 echo "Setting permissions..."
 docker compose exec -T app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-echo "Deployment complete! App running at http://localhost:$APP_PORT"
+echo "Deployment complete!"
+echo "Default Admin: admin@tangbull.com / password"
+echo "App running at http://localhost:$APP_PORT"
 echo "Check logs with: docker compose logs -f app"
