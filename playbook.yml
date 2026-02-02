@@ -5,14 +5,19 @@
   vars_files:
     - vars/all.yml
 
-  vars_prompt:
-    - name: "signalwire_freeswitch_key"
-      prompt: "Enter your SignalWire FreeSWITCH Token"
-      private: yes
-      unsafe: yes
+  tasks:
+    - name: Check for SignalWire Token
+      pause:
+        prompt: "Enter your SignalWire FreeSWITCH Token (hidden)"
+        echo: no
+      register: prompt_result
       when: signalwire_freeswitch_key is not defined or signalwire_freeswitch_key == 'YOUR_TOKEN_HERE'
 
-  tasks:
+    - name: Set SignalWire Token from prompt
+      set_fact:
+        signalwire_freeswitch_key: "{{ prompt_result.user_input }}"
+      when: prompt_result is not skipped and prompt_result.user_input is defined
+
     - name: Include Setup Tasks
       include_tasks: tasks/setup.yml
 
