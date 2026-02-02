@@ -119,3 +119,36 @@ git remote set-url --add --push origin git@github.com:herbiel/ansible.git
 ```bash
 git push origin main
 ```
+
+---
+
+## 8. Docker 部署模板 (Laravel)
+
+项目包含了一个通用的 Laravel Docker 部署模板，位于 `laravel-docker/` 目录。
+该模板支持动态 PHP 版本切换、Horizon 队列管理、Redis 和 DB 服务，并支持多项目共存。
+
+### 8.1 使用方法
+将模板复制到任意 Laravel 项目根目录：
+```bash
+cp -r /path/to/ansible/laravel-docker/* /path/to/your-laravel-project/
+```
+
+### 8.2 配置
+复制 `.env.example` 并编辑：
+```bash
+cp .env.example .env
+```
+重点修改 `APP_NAME` (用于区分 Docker 容器名) 和 `PHP_VERSION`：
+```ini
+APP_NAME=my-project-name
+PHP_VERSION=7.4
+APP_PORT=8080
+```
+
+### 8.3 启动
+使用提供的脚本一键启动：
+```bash
+./deploy.sh
+```
+这将自动构建镜像（使用 `archive.debian.org` 源以兼容旧版 PHP）、启动服务并运行迁移。
+
