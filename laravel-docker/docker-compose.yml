@@ -13,7 +13,9 @@ services:
     ports:
       - "${APP_PORT:-8000}:80"
     volumes:
-      - ./:/var/www/html
+    volumes:
+      - ${APP_CODE_PATH:-./}:/var/www/html
+      - ./deploy/nginx.conf:/etc/nginx/sites-enabled/default
       - ./deploy/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
     environment:
       - APP_ENV=${APP_ENV:-local}

@@ -2,9 +2,27 @@
 
 # Copy .env if not exists
 if [ ! -f .env ]; then
-    cp .env.example .env
-    echo ".env created from .env.example"
+    echo "Error: .env file not found. Please copy .env.example to .env and configure it."
+    exit 1
 fi
+
+# Load .env variables
+export $(grep -v '^#' .env | xargs)
+
+# Check if APP_CODE_PATH is set and valid
+if [ -z "$APP_CODE_PATH" ]; then
+    echo "Error: APP_CODE_PATH is not set in .env"
+    exit 1
+fi
+
+if [ ! -d "$APP_CODE_PATH" ]; then
+    echo "Error: Project path '$APP_CODE_PATH' does not exist."
+    exit 1
+fi
+
+echo "Deploying project from: $APP_CODE_PATH"
+echo "Project Name: $APP_NAME"
+echo "PHP Version: $PHP_VERSION"
 
 # Build and start containers
 echo "Building Docker containers..."
@@ -13,7 +31,6 @@ docker-compose build
 echo "Starting deployment..."
 docker-compose up -d
 
-# Wait for database to be ready (optional check could be added)
 echo "Waiting for services to initialize..."
 sleep 10
 
@@ -24,5 +41,5 @@ docker-compose exec app php artisan migrate --force
 # Set permissions
 docker-compose exec app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-echo "Deployment complete! App running at http://localhost:8000"
+echo "Deployment complete! App running at http://localhost:$APP_PORT"
 echo "Check logs with: docker-compose logs -f app"
