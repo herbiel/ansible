@@ -49,3 +49,14 @@
     name: "php{{ php_version }}-fpm"
     state: started
     enabled: yes
+
+- name: Set PHP {{ php_version }} as default CLI version
+  command: update-alternatives --set php /usr/bin/php{{ php_version }}
+  # Run this only if the version exists, though the previous task ensures it's installed.
+  # We suppress changed status to keep output clean, or you can add a check logic.
+  changed_when: false
+
+- name: Install Composer
+  apt:
+    name: composer
+    state: present
