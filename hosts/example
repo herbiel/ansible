@@ -1,15 +1,14 @@
 [voip]
-# Add your servers here
-# 192.168.1.100
+# 192.168.1.10
 
 [web]
-# Add your servers here
-# 192.168.1.101
+# 192.168.1.11
 
 [all_in_one:children]
 voip
 web
 
 [all:vars]
+ansible_python_interpreter=/usr/bin/python3
 ansible_user=debian
 ansible_become=yes

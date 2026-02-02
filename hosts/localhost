@@ -1,0 +1,14 @@
+[voip]
+localhost ansible_connection=local
+
+[web]
+localhost ansible_connection=local
+
+[all_in_one:children]
+voip
+web
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=debian
+ansible_become=yes

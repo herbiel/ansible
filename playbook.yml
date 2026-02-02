@@ -5,6 +5,13 @@
   vars_files:
     - vars/all.yml
 
+  vars_prompt:
+    - name: "signalwire_freeswitch_key"
+      prompt: "Enter your SignalWire FreeSWITCH Token"
+      private: yes
+      unsafe: yes
+      when: signalwire_freeswitch_key is not defined or signalwire_freeswitch_key == 'YOUR_TOKEN_HERE'
+
   tasks:
     - name: Include Setup Tasks
       include_tasks: tasks/setup.yml

@@ -29,6 +29,15 @@
 - **`freeswitch_modules`**: 定义需要加载的 FreeSWITCH 模块列表。
 - **服务开关**: 例如 `deploy_nginx: yes/no` 可以控制是否执行特定的安装任务。
 
+### 2.3 交互式输入
+如果您不想在文件中写 Token，可以在运行剧本时根据提示手动输入。剧本已配置 `vars_prompt`，当检测到 `vars/all.yml` 中的 Token 为默认占位符时，会提示您输入。
+
+### 2.4 命令行传参 (推荐)
+您也可以通过 `-e` 直接通过命令行输入任何变量：
+```bash
+ansible-playbook -i inventory.ini playbook.yml -e "signalwire_freeswitch_key=你的TOKEN"
+```
+
 ---
 
 ## 3. 部署方式 (Deployment)
