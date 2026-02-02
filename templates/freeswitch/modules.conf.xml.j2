@@ -1,0 +1,7 @@
+<configuration name="modules.conf" description="Modules">
+  <modules>
+{% for module in freeswitch_modules %}
+    <load module="{{ module }}"/>
+{% endfor %}
+  </modules>
+</configuration>

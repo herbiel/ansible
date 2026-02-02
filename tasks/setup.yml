@@ -1,0 +1,16 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install common dependencies
+  apt:
+    name:
+      - curl
+      - gnupg2
+      - wget
+      - lsb-release
+      - apt-transport-https
+      - ca-certificates
+    state: present

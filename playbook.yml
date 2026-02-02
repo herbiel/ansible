@@ -1,0 +1,40 @@
+---
+- name: Deploy FreeSWITCH and PHP Environment
+  hosts: all
+  gather_facts: yes
+  vars_files:
+    - vars/all.yml
+
+  tasks:
+    - name: Include Setup Tasks
+      include_tasks: tasks/setup.yml
+
+    - name: Include FreeSWITCH Tasks
+      include_tasks: tasks/freeswitch.yml
+      when: deploy_freeswitch | bool and ('voip' in group_names or 'all_in_one' in group_names)
+      tags: freeswitch
+
+    - name: Include PHP Tasks
+      include_tasks: tasks/php.yml
+      when: deploy_php | bool and ('web' in group_names or 'all_in_one' in group_names)
+      tags: php
+
+    - name: Include Nginx Tasks
+      include_tasks: tasks/nginx.yml
+      when: deploy_nginx | bool
+      tags: nginx
+
+    - name: Include Redis Tasks
+      include_tasks: tasks/redis.yml
+      when: deploy_redis | bool
+      tags: redis
+
+    - name: Include MariaDB Tasks
+      include_tasks: tasks/mariadb.yml
+      when: deploy_mariadb | bool
+      tags: mariadb
+
+    - name: Include Supervisor Tasks
+      include_tasks: tasks/supervisor.yml
+      when: deploy_supervisor | bool
+      tags: supervisor

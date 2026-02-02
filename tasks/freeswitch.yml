@@ -1,0 +1,46 @@
+---
+- name: Fetch password protected FreeSWITCH GPG key
+  get_url:
+    url: https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg
+    username: signalwire
+    password: '{{ signalwire_freeswitch_key }}'
+    dest: /usr/share/keyrings/signalwire-freeswitch-repo.gpg
+
+- name: Create apt auth.conf.d freeswitch file
+  copy:
+    dest: /etc/apt/auth.conf.d/freeswitch.conf
+    owner: root
+    group: root
+    mode: '0700'
+    content: 'machine freeswitch.signalwire.com login signalwire password {{ signalwire_freeswitch_key }}'
+
+- name: Add SignalWire FreeSWITCH repo
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ {{ ansible_distribution_release }} main"
+    state: present
+    filename: freeswitch
+
+- name: Install FreeSWITCH packages
+  apt:
+    name:
+      - freeswitch
+      - freeswitch-all
+      - freeswitch-mod-lua
+      - freeswitch-mod-shout
+    state: present
+    update_cache: yes
+
+- name: Configure FreeSWITCH modules
+  template:
+    src: templates/freeswitch/modules.conf.xml.j2
+    dest: /etc/freeswitch/autoload_configs/modules.conf.xml
+    owner: freeswitch
+    group: freeswitch
+    mode: '0644'
+  notify: restart freeswitch
+
+- name: Ensure FreeSWITCH is started and enabled
+  service:
+    name: freeswitch
+    state: started
+    enabled: yes
