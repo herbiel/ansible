@@ -47,6 +47,11 @@ docker compose exec -T app composer --version
 
 # Force remove old vendor to ensure clean slate for Composer 2 compatibility
 docker compose exec -T app rm -rf vendor composer.lock
+
+# Auto-patch composer.json to allow newer Laravel 5.5 versions (Fixes Composer 2 Incompatibility)
+echo "Patching composer.json for Composer 2 compatibility..."
+docker compose exec -T app sed -i 's/"laravel\/framework": "5.5.42"/"laravel\/framework": "5.5.*"/' composer.json
+
 docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
 # Fix permissions after install
 docker compose exec -T app chown -R www-data:www-data /var/www/html/vendor
