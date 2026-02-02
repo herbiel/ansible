@@ -52,10 +52,18 @@ docker compose exec -T app rm -rf vendor composer.lock
 echo "Patching composer.json for Composer 2 compatibility..."
 docker compose exec -T app sed -i 's/"laravel\/framework": "5.5.42"/"laravel\/framework": "5.5.*"/' composer.json
 
-# Allow necessary plugins for Composer 2
+# Allow necessary plugins for Composer 2 (Explicitly and verifiable)
+echo "Configuring allowed plugins..."
 docker compose exec -T app composer config --no-plugins allow-plugins.kylekatarnls/update-helper true
 docker compose exec -T app composer config --no-plugins allow-plugins.symfony/thanks true
 
+# Debug: verify config applied
+echo "Verifying composer.json content:"
+docker compose exec -T app cat composer.json
+
+echo "Installing Composer dependencies..."
+# Use --no-plugins during install if needed, but we likely need them. 
+# We rely on the config above being successful.
 docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
 # Fix permissions after install
 docker compose exec -T app chown -R www-data:www-data /var/www/html/vendor
