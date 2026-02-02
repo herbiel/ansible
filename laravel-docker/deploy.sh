@@ -21,6 +21,11 @@ if [ ! -d "$APP_CODE_PATH" ]; then
 fi
 
 echo "Deploying project from: $APP_CODE_PATH"
+
+# Convert APP_NAME to lowercase for Docker compatibility
+APP_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
+export APP_NAME
+
 echo "Project Name: $APP_NAME"
 echo "PHP Version: $PHP_VERSION"
 
