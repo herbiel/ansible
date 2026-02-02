@@ -31,10 +31,10 @@ echo "PHP Version: $PHP_VERSION"
 
 # Build and start containers
 echo "Building Docker containers..."
-docker-compose build
+docker compose build
 
 echo "Starting deployment..."
-docker-compose up -d
+docker compose up -d
 
 echo "Waiting for services to initialize..."
 sleep 10
@@ -42,17 +42,17 @@ sleep 10
 # Install dependencies if missing
 if [ ! -f "$APP_CODE_PATH/vendor/autoload.php" ]; then
     echo "Installing Composer dependencies..."
-    docker-compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
+    docker compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
     # Fix permissions after install
-    docker-compose exec -T app chown -R www-data:www-data /var/www/html/vendor
+    docker compose exec -T app chown -R www-data:www-data /var/www/html/vendor
 fi
 
 # Run migrations and setup
 echo "Running migrations..."
-docker-compose exec app php artisan migrate --force
+docker compose exec app php artisan migrate --force
 
 # Set permissions
-docker-compose exec app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+docker compose exec app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 echo "Deployment complete! App running at http://localhost:$APP_PORT"
-echo "Check logs with: docker-compose logs -f app"
+echo "Check logs with: docker compose logs -f app"
