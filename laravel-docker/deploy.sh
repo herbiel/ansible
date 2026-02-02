@@ -34,6 +34,14 @@ docker-compose up -d
 echo "Waiting for services to initialize..."
 sleep 10
 
+# Install dependencies if missing
+if [ ! -f "$APP_CODE_PATH/vendor/autoload.php" ]; then
+    echo "Installing Composer dependencies..."
+    docker-compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
+    # Fix permissions after install
+    docker-compose exec -T app chown -R www-data:www-data /var/www/html/vendor
+fi
+
 # Run migrations and setup
 echo "Running migrations..."
 docker-compose exec app php artisan migrate --force
