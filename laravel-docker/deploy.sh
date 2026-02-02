@@ -41,6 +41,10 @@ sleep 10
 
 # Install dependencies if missing or corrupted
 echo "Updating/Installing Composer dependencies..."
+# Verify Composer version
+echo "Composer Version:"
+docker compose exec -T app composer --version
+
 # Force remove old vendor to ensure clean slate for Composer 2 compatibility
 docker-compose exec -T app rm -rf vendor composer.lock
 docker-compose exec -T app composer install --no-interaction --optimize-autoloader --no-dev
