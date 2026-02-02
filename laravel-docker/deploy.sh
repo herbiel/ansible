@@ -72,21 +72,26 @@ else
     echo "Hint: If you need to update dependencies, run: docker compose exec app composer install"
 fi
 
+# Load environment variables from .env
+if [ -f .env ]; then
+    export $(cat .env | grep -v '^#' | xargs)
+fi
+
 # Run migrations and setup
 echo "Checking database status..."
-# Check if core table 'users' exists
-TABLE_EXISTS=$(docker compose exec -T db mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" -N -e "SHOW TABLES LIKE 'users';" "$DB_DATABASE" || echo "")
+# Check for business-specific table to determine if initialization is needed
+TABLE_EXISTS=$(docker compose exec -T db mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" -N -e "SHOW TABLES LIKE 'business_user';" "$DB_DATABASE" 2>/dev/null || echo "")
 
 if [ -z "$TABLE_EXISTS" ]; then
-    echo "Database is empty. Initializing with database/init.sql..."
+    echo "Business tables missing. Initializing with database/init.sql..."
     if [ -f "$APP_CODE_PATH/database/init.sql" ]; then
         docker compose exec -T db mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" < "$APP_CODE_PATH/database/init.sql"
-        echo "Database initialized successfully."
+        echo "Database initialized successfully (via init.sql)."
     else
         echo "Warning: database/init.sql not found. Skipping initialization."
     fi
 else
-    echo "Database already contains data. Skipping initialization."
+    echo "Database already contains business data. Skipping initialization script."
 fi
 
 echo "Running migrations..."
