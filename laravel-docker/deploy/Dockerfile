@@ -43,6 +43,10 @@ WORKDIR /var/www/html
 # Create log directory for Supervisor
 RUN mkdir -p /var/log/supervisor
 
+# Copy PHP configuration
+COPY deploy/php.ini /usr/local/etc/php/conf.d/app.ini
+COPY deploy/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+
 # Clean up apt cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
