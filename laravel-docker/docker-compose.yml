@@ -36,7 +36,9 @@ services:
     image: redis:6-alpine
     container_name: ${APP_NAME:-laravel}_redis
     restart: always
-    command: redis-server --requirepass ${REDIS_PASSWORD:-secret} --maxmemory 512mb --maxmemory-policy allkeys-lru
+    command: redis-server --requirepass ${REDIS_PASSWORD:-secret} --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis_data:/data
     networks:
       - app-network
 
@@ -61,3 +63,4 @@ networks:
 
 volumes:
   db_data:
+  redis_data:
